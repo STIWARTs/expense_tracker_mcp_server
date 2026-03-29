@@ -1,253 +1,143 @@
-# FastMCP Setup Guide (Python + Inspector)
+# Building a Custom Local MCP Server for Expense Tracking
+![Demo](DEMO1.png)
+![Demo](DEMO2.png)
+## Introduction and Playlist Overview
+This session focuses on building a local MCP (Model Context Protocol) server for expense tracking. MCP enables AI models and client apps to communicate smoothly. The playlist is divided into three parts: Why (importance), What (architecture and lifecycle), and How (practical builds).
 
-![Demo](DEMO.png)
+Earlier videos used ready-made servers; now the focus shifts to building custom ones. The goal here is to create an intermediate-level server that tracks expenses using natural language commands.
 
-## Overview
-
-This project uses FastMCP to build a Model Context Protocol (MCP) server in Python.
-There are two ways to inspect and test the server:
-
-1. Python CLI Inspector (text-based)
-2. Node Inspector (web UI)
-
----
-
-## 1. Project Setup (Python FastMCP)
-
-### Step 1: Initialize project
-
-```bash
-uv init
-```
-
-### Step 2: Install FastMCP
-
-```bash
-uv add fastmcp
-```
-
-### Step 3: Create main.py
-
-```python
-from fastmcp import FastMCP
-
-# Create a FastMCP instance server with the name "Demo Server"
-mcp = FastMCP("Demo Server")
-
-@mcp.tool
-def roll_dice(n_dice: int = 1) -> list[int]:
-    """Roll n_dice 6-sided dice and return the results."""
-    return [random.randint(1, 6) for _ in range(n_dice)]
-
-@mcp.tool
-def add_numbers(a: float, b: float) -> float:
-    """Add two numbers and return the result."""
-    return a + b
-
-if __name__ == "__main__":
-    mcp.run()
-```
+**Key points:**
+- MCP defines rules for communication between AI and apps.
+- Learning path: Why → What → How.
+- We now move from demos to building custom servers.
+- The target server: an expense tracker that works with natural language.
 
 ---
 
-## 2. Running the MCP Server
+## Concept and Demo of Expense Tracker
+The expense tracker MCP server accepts natural language inputs like:
+- “Add milk expense of ₹20”
+- “Show all expenses from September”
 
-```bash
-uv run fastmcp run main.py 
-```
+It can add entries, list them, and summarize totals or categories. Unlike traditional apps, this approach feels natural and conversational. A demo shows how it handles dates (“yesterday”), categories, and notes automatically.
 
----
-
-## 3. Python CLI Inspector (Text-based)
-
-### Run inspector
-
-```bash
-uv run fastmcp inspect .\main.py:mcp
-```
-
-### Optional: JSON output
-
-```bash
-uv run fastmcp inspect .\main.py:mcp --format fastmcp
-```
-
-### Features
-
-* Lists tools
-* Shows schemas
-* Displays metadata
+**Key points:**
+- Natural language interface makes expense tracking easier.
+- Works in real time with a chatbot client (like Cloud Desktop).
+- Can add, list, and summarize expenses quickly.
 
 ---
 
-## 4. Node Inspector (Web UI)
+## Planning the Build and Understanding MCP Protocol
+Before coding, the plan is to start with a simple MCP server (like a dice roller) to understand setup, running, and client integration.
 
-### Requirement
+MCP is a protocol (set of rules). Writing servers from scratch is complex, so we use libraries. Two main options are:
+- MCP SDK (official library)
+- FastMCP (simplified abstraction)
 
-Node.js must be installed.
-
-### Run inspector
-
-```bash
-npx fastmcp inspect main.py
-```
-
-### What happens
-
-* Installs inspector if needed
-* Starts local server
-* Opens browser automatically
-
-### Default URL
-
-```
-http://localhost:6274
-```
+**Key points:**
+- MCP SDK is powerful but verbose.
+- FastMCP makes development much easier.
 
 ---
 
-## 5. Using the Web Inspector
+## Evolution of MCP Libraries
+- MCP was introduced by Anthropic in 2023.
+- The first SDK was too boilerplate-heavy.
+- FastMCP (by Jeremiah Lowin) simplified it, like Keras simplified TensorFlow.
+- FastMCP was later integrated into the SDK but also exists independently.
 
-In the browser UI:
-
-* View available tools
-* Execute tools interactively
-* Inspect input/output
-* Debug schemas
-
----
-
-## 6. Calling Tools via CLI
-
-```bash
-uv run fastmcp call .\main.py:mcp hello
-```
-
-Expected output:
-
-```
-"hi"
-```
+**Key points:**
+- SDK had sub-libraries (server, client, CLI).
+- FastMCP became the developer-friendly choice.
 
 ---
 
-## 7. Common Issues and Fixes
+## Current State of Libraries
+Today, developers can choose:
+- MCP SDK with its tools.
+- FastMCP 2.0 as an independent, simpler option.
 
-### Issue: File not found (main)
-
-**Cause:** Module import fails
-**Fix:**
-
-```bash
-uv run fastmcp inspect .\main.py:mcp
-```
+The tutorial uses FastMCP as it’s the preferred, future-ready choice.
 
 ---
 
-### Issue: Unknown command "main.py"
+## Building a Basic MCP Server (Dice Roll Example)
+A basic server is built with two tools:
+- A dice roller.
+- A function to add two numbers.
 
-**Cause:** Wrong syntax
-**Fix:**
+This helps practice installing dependencies, writing MCP tools, running servers, and debugging with MCP Inspector (like Postman for MCP). Integration with Cloud Desktop is also shown.
 
-```bash
-main:mcp   (module syntax)
-.\main.py:mcp (file path syntax)
-```
-
----
-
-### Issue: fastmcp not recognized
-
-**Cause:** Using uv environment
-**Fix:**
-
-```bash
-uv run fastmcp ...
-```
+**Key points:**
+- Use uvicorn (uv) for running MCP servers.
+- Write Python functions decorated as MCP tools.
+- Debug with MCP Inspector.
+- Connect to Cloud Desktop for real-time interaction.
 
 ---
 
-### Issue: Web inspector not opening
+## Developing the Expense Tracker Server
+The main project implements three tools:
+- Add Expense – save amount, date, category, note.
+- List Expenses – fetch entries, optionally filter by dates.
+- Summarize Expenses – totals by category or range.
 
-**Fix:**
+Data is stored in SQLite (expenses.db). The database schema includes ID, date, amount, category, subcategory, and notes.
 
-* Ensure Node.js is installed
-* Use:
-
-```bash
-npx fastmcp inspect main.py
-```
-
----
-
-## 8. Key Differences
-
-| Feature     | Python Inspector       | Node Inspector        |
-| ----------- | ---------------------- | --------------------- |
-| Interface   | CLI                    | Web UI                |
-| Command     | uv run fastmcp inspect | npx fastmcp inspect   |
-| Interaction | Manual                 | Interactive           |
-| Use case    | Debugging              | Development & testing |
+**Key points:**
+- SQLite is simple and good for local storage.
+- Tools wrap SQL commands in MCP functions.
+- Features are added incrementally: add → list → filter → summarize.
 
 ---
 
-## 9. Recommended Workflow
+## Improving Consistency with Resources
+Problem: users may type inconsistent categories (“Education” vs “Upskilling”).
 
-1. Build MCP server in Python
-2. Use CLI inspector for quick checks
-3. Use Node inspector for interactive testing
-4. Expand tools and integrate with clients
+Solution: create a JSON resource listing valid categories/subcategories. Clients can pull from this list to enforce uniform data.
+
+**Key points:**
+- Resources prevent messy category data.
+- JSON file exposed via MCP resource decorator.
 
 ---
 
-## 10. Notes
+## Expanding Features
+Suggested enhancements:
+- Edit or delete expenses.
+- Add income/credits.
+- Budget tracking.
 
-* Always use `.\\main.py:mcp` if path has spaces
-* Do not rely on global installations
-* Prefer `uv run` for consistency
+This could evolve the project into a complete personal finance app.
 
+---
 
-## 11. Add the server to Claude Desktop
+## FastAPI and MCP Integration
+FastMCP borrows ideas from FastAPI and works seamlessly with it.
+- A FastAPI app can be turned into an MCP server with minimal code.
+- This is useful for companies that already use FastAPI backends for multi-platform apps.
+- Instead of building new logic, they can extend their existing backend to support MCP clients like Cloud Desktop.
 
-To add your MCP server to Claude Desktop, run:
+**Key points:**
+- FastMCP ↔ FastAPI compatibility.
+- Reuse existing APIs for MCP servers.
+- Saves time and avoids duplication.
 
-```bash
-uv run fastmcp install claude-desktop main.py
-```
+---
 
-## Setup Instructions for Cloned Repository
+## Conclusion and Next Steps
+We successfully built a functional local MCP server for expense tracking. The next step: convert this local server into a remote, production-ready server accessible globally.
 
-If you have cloned this repository, follow these steps to set up the project:
+---
 
-1. **Install uv (if not already installed):**
-    - [uv installation guide](https://github.com/astral-sh/uv#installation)
-
-2. **Install dependencies:**
-    ```bash
-    uv pip install -r requirements.txt
-    # or, if using pyproject.toml:
-    uv pip install
-    ```
-
-3. **Run the MCP server:**
-    ```bash
-    uv run fastmcp run main.py
-    ```
-
-4. **(Optional) Inspect with CLI:**
-    ```bash
-    uv run fastmcp inspect .\main.py:mcp
-    ```
-
-5. **(Optional) Use Node Inspector (Web UI):**
-    - Make sure Node.js is installed
-    ```bash
-    npx fastmcp inspect main.py
-    ```
-
-6. **(Optional) Add to Claude Desktop:**
-    ```bash
-    uv run fastmcp install claude-desktop main.py
-    ```
+## Key Takeaways
+- MCP enables AI → app communication.
+- Libraries (MCP SDK & FastMCP) simplify server building.
+- Expense tracker demo shows natural language input for finance management.
+- JSON resources ensure clean, consistent data.
+- MCP Inspector is essential for debugging.
+- FastMCP integrates with FastAPI → great for companies.
+- Roadmap: local server → remote production server.
 
 ---
