@@ -1,6 +1,7 @@
 # Building a Deployed Expense Tracker MCP Server 
 ![Demo](DEMO1.png)
 ![Demo](DEMO2.png)
+![Demo](DEMO3.png)
 
 ## Concept of Expense Tracker
 The expense tracker MCP server accepts natural language inputs like:
