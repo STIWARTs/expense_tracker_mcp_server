@@ -214,3 +214,40 @@ To add your MCP server to Claude Desktop, run:
 ```bash
 uv run fastmcp install claude-desktop main.py
 ```
+
+## Setup Instructions for Cloned Repository
+
+If you have cloned this repository, follow these steps to set up the project:
+
+1. **Install uv (if not already installed):**
+    - [uv installation guide](https://github.com/astral-sh/uv#installation)
+
+2. **Install dependencies:**
+    ```bash
+    uv pip install -r requirements.txt
+    # or, if using pyproject.toml:
+    uv pip install
+    ```
+
+3. **Run the MCP server:**
+    ```bash
+    uv run fastmcp run main.py
+    ```
+
+4. **(Optional) Inspect with CLI:**
+    ```bash
+    uv run fastmcp inspect .\main.py:mcp
+    ```
+
+5. **(Optional) Use Node Inspector (Web UI):**
+    - Make sure Node.js is installed
+    ```bash
+    npx fastmcp inspect main.py
+    ```
+
+6. **(Optional) Add to Claude Desktop:**
+    ```bash
+    uv run fastmcp install claude-desktop main.py
+    ```
+
+---
